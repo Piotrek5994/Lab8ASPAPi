@@ -1,0 +1,107 @@
+using AspNetCore;
+using lab_8.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace lab_8.Controllers
+{
+    [Route("api/books")]
+    [ApiController]
+    public class BookApiController : ControllerBase
+    {
+        private readonly IBookService _bookService;
+
+        public BookApiController(IBookService bookService)
+        {
+            _bookService = bookService;
+        }
+
+        [HttpGet]
+        public List<Book> Get()
+        {
+            return _bookService.FindAll().ToList();
+        }
+
+
+
+        [Route("{id}")]
+        public IActionResult Get(int id)
+        {
+            Book book = _bookService.FindBy(id);
+            if (book is null)
+            {
+                return NotFound();
+
+            }
+            else
+            {
+
+                return new OkObjectResult(book);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult<Book> Post([FromBody] Book book)
+        {
+            if (ModelState.IsValid)
+            {
+                int id = _bookService.Save(book);
+                return Created($"/api/books/{id}", book);
+
+
+
+            }
+            return BadRequest();
+
+
+        }
+        public IActionResult Delete(int id)
+        {
+            if (_bookService.Delete(id))
+            {
+                return Ok();
+            }
+            else 
+            {
+                return NotFound();
+            }
+            
+        }
+
+        public ActionResult<Book> Put([FromBody] Book book)
+        {
+            if (ModelState.IsValid)
+            {
+                if (_bookService.Update(book))
+                {
+                    return new OkObjectResult(book);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            else 
+            {
+                return BadRequest();
+
+
+            }
+        }
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+}
